@@ -1,1 +1,1 @@
-# my-photo-editor
+#photo-editor
