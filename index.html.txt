@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>AI 輕量修圖工具</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: #f0f2f5; }
+        #canvas-container { margin: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); background: white; }
+        .controls { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 20px; background: white; border-radius: 8px; }
+        canvas { max-width: 100%; height: auto; }
+    </style>
+</head>
+<body>
+
+    <h2>輕量化照片編輯器</h2>
+    
+    <input type="file" id="upload" accept="image/*">
+    
+    <div id="canvas-container">
+        <canvas id="mainCanvas"></canvas>
+    </div>
+
+    <div class="controls">
+        <label>亮度: <input type="range" id="brightness" min="0" max="200" value="100"></label>
+        <label>模糊: <input type="range" id="blur" min="0" max="10" value="0"></label>
+        <label>對比: <input type="range" id="contrast" min="0" max="200" value="100"></label>
+        <button id="download">下載圖片</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+        const upload = document.getElementById('upload');
+        let img = new Image();
+
+        upload.addEventListener('change', (e) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                img.onload = () => {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    applyFilters();
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        });
+
+        function applyFilters() {
+            const b = document.getElementById('brightness').value;
+            const blur = document.getElementById('blur').value;
+            const c = document.getElementById('contrast').value;
+
+            ctx.filter = `brightness(${b}%) blur(${blur}px) contrast(${c}%)`;
+            ctx.drawImage(img, 0, 0);
+        }
+
+        document.querySelectorAll('input[type=range]').forEach(input => {
+            input.oninput = applyFilters;
+        });
+
+        document.getElementById('download').onclick = () => {
+            const link = document.createElement('a');
+            link.download = 'edited-image.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        };
+    </script>
+</body>
+</html>
